@@ -14,9 +14,14 @@ def main():
     check_requirements_file()
     create_virtual_env()
     install_dependencies()
+    init_postgres_config()
 
     print(
-        "\n\nProceso completado.\n\nADVERTENCIA: Recuerde activar el entorno virtual desde su editor de código.\n"
+        "\n\nProceso completado."
+        + "\n\nADVERTENCIAS:\n"
+        + "1. Recuerde completar los datos de conexión de las bases de datos en config/"
+        + "2. Recuerde activar el entorno virtual desde su editor de código."
+        + "\n"
     )
 
 
@@ -53,9 +58,37 @@ def install_dependencies():
         f"Usando: {python_executable}\nRuta completa: {python_path}\nInstalando dependencias de Python desde {requirements_file}...\n"
     )
     subprocess.check_call(
+        [
+            python_executable,
+            "-m",
+            "pip",
+            "install",
+            "--upgrade",
+            "pip",
+            "setuptools",
+        ],
+        stderr=subprocess.STDOUT,
+    )
+    subprocess.check_call(
         [python_executable, "-m", "pip", "install", "-r", requirements_file],
         stderr=subprocess.STDOUT,
     )
+
+
+def init_postgres_config():
+    repo_url = "https://github.com/JuanLoaiza007/config-postgres-yaml-template.git"
+    target_dir = "config"
+
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+
+    try:
+        subprocess.check_call(["git", "clone", repo_url, target_dir])
+        print(
+            f"El archivo de configuración se ha creado en: {os.path.abspath(target_dir)}"
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Error al clonar el archivo de configuración: {e}")
 
 
 if __name__ == "__main__":
