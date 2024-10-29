@@ -7,9 +7,7 @@ requirements_file = "requirements.txt"
 
 
 def main():
-    print(
-        "\nIniciando instalación y configuración del proyecto.\nEspere por favor...\n"
-    )
+    print("\nIniciando instalación y configuración del proyecto.\nEspere por favor...")
 
     check_requirements_file()
     create_virtual_env()
@@ -18,21 +16,20 @@ def main():
 
     print(
         "\n\nProceso completado."
-        + "\n\nADVERTENCIAS:\n"
-        + "1. Recuerde completar los datos de conexión de las bases de datos en config/"
-        + "2. Recuerde activar el entorno virtual desde su editor de código."
-        + "\n"
+        + "\n\nADVERTENCIAS:"
+        + "\n1. Recuerde completar los datos de conexión de las bases de datos en config."
+        + "\n2. Recuerde activar el entorno virtual desde su editor de código."
     )
 
 
 def check_requirements_file():
     if not os.path.exists(requirements_file):
-        print(f"El archivo {requirements_file} no existe.\n")
+        print(f"\nEl archivo {requirements_file} no existe.")
         sys.exit(1)
 
 
 def create_virtual_env():
-    print("Creando entorno virtual...\n")
+    print("\nCreando entorno virtual...")
     subprocess.check_call([sys.executable, "-m", "venv", env_name])
 
 
@@ -55,7 +52,9 @@ def install_dependencies():
     )
 
     print(
-        f"Usando: {python_executable}\nRuta completa: {python_path}\nInstalando dependencias de Python desde {requirements_file}...\n"
+        f"\nUsando: {python_executable}"
+        + "\nRuta completa: {python_path}"
+        + "\nInstalando dependencias de Python desde {requirements_file}...\n"
     )
     subprocess.check_call(
         [
@@ -85,10 +84,10 @@ def init_postgres_config():
     try:
         subprocess.check_call(["git", "clone", repo_url, target_dir])
         print(
-            f"El archivo de configuración se ha creado en: {os.path.abspath(target_dir)}"
+            f"\nEl archivo de configuración se ha creado en: {os.path.abspath(target_dir)}"
         )
     except subprocess.CalledProcessError as e:
-        print(f"Error al clonar el archivo de configuración: {e}")
+        print(f"\nError al clonar el archivo de configuración: {e}")
 
 
 if __name__ == "__main__":
