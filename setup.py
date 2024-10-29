@@ -53,8 +53,8 @@ def install_dependencies():
 
     print(
         f"\nUsando: {python_executable}"
-        + "\nRuta completa: {python_path}"
-        + "\nInstalando dependencias de Python desde {requirements_file}...\n"
+        + f"\nRuta completa: {python_path}"
+        + f"\nInstalando dependencias de Python desde {requirements_file}...\n"
     )
     subprocess.check_call(
         [
