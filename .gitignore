@@ -1,3 +1,7 @@
+# Archivos RAW pesados
+bd-OLTP
+bd_OLTP
+
 # Entornos virtuales
 venv
 
