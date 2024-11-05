@@ -1,4 +1,5 @@
 # Archivos de configuración
+config
 config*.yaml
 
 # Archivos RAW pesados
