@@ -10,15 +10,15 @@ def main():
 
     check_requirements_file()
     create_virtual_env()
+    update_pip_and_setuptools()
     install_dependencies()
     init_postgres_config()
 
     print(
         "\n\nProceso completado."
-        + "\n\nSiguientes pasos:"
-        + "\n   1. Complete los datos de conexión de las bases de datos en `config/`."
-        + "\n   2. Active el entorno virtual desde su editor de código."
-        + "\n   3. Ejecute el archivo 'main.py' para iniciar el proceso ETL."
+        + "\n\nADVERTENCIAS:"
+        + "\n1. Recuerde completar los datos de conexión de las bases de datos en config."
+        + "\n2. Recuerde activar el entorno virtual desde su editor de código."
     )
 
 
@@ -33,24 +33,27 @@ def create_virtual_env():
     os.system(f"{sys.executable} -m venv {env_name}")
 
 
-def install_dependencies():
-    python_executable = generate_python_executable()
-    print(
-        f"\nUsando: {python_executable}"
-        + f"\nInstalando dependencias de Python desde {requirements_file}...\n"
-    )
-    # Actualización de pip y setuptools
-    os.system(f"{python_executable} -m pip install --upgrade pip setuptools")
-    # Instalación de requerimientos
-    os.system(f"{python_executable} -m pip install -r {requirements_file}")
-
-
 def generate_python_executable():
     return (
         os.path.join(env_name, "Scripts", "python.exe")
         if os.name == "nt"
         else os.path.join(env_name, "bin", "python")
     )
+
+
+def update_pip_and_setuptools():
+    python_executable = generate_python_executable()
+    print(f"\nActualizando pip y setuptools en el entorno virtual...")
+    os.system(f"{python_executable} -m pip install --upgrade pip setuptools")
+
+
+def install_dependencies():
+    python_executable = generate_python_executable()
+    print(
+        f"\nUsando: {python_executable}"
+        + f"\nInstalando dependencias de Python desde {requirements_file}...\n"
+    )
+    os.system(f"{python_executable} -m pip install -r {requirements_file}")
 
 
 def init_postgres_config():
@@ -61,11 +64,7 @@ def init_postgres_config():
         os.makedirs(target_dir)
 
     if os.system(f"git clone {repo_url} {target_dir}") == 0:
-
-        # Eliminar el directorio .git para que no sea reconocido como repositorio
         git_dir = os.path.join(target_dir, ".git")
-
-        # Elimina el rastro de git para hacer la carpeta independiente
         if os.path.exists(git_dir):
             if os.name == "nt":
                 os.system(f"rmdir /S /Q {git_dir}")
