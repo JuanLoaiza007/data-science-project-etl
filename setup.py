@@ -18,6 +18,8 @@ def main():
         return
     if not init_postgres_config():
         return
+    if not create_success_file():
+        return
 
     print(
         "\n\n[FIN] Proceso completado."
@@ -110,6 +112,17 @@ def init_postgres_config():
     print(
         f"\nEl archivo de configuración se ha creado en: {os.path.abspath(target_dir)}"
     )
+    return True
+
+
+def create_success_file():
+    success_file_path = os.path.join(env_name, "setup_success")
+    try:
+        with open(success_file_path, "w") as file:
+            pass
+    except Exception as e:
+        print(f"\n[ERROR] Falló la creación del archivo de confirmación: {e}")
+        return False
     return True
 
 
