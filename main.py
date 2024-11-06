@@ -1,51 +1,97 @@
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 import os
+import sys
 
-## IMPORTANTE: Este archivo NO DEBE ser ejecutado sin haber ejecutado setup.py.
+debug = False
 
-# Ruta de la carpeta que contiene los notebooks
 NOTEBOOKS_DIR = "notebooks"
+notebooks = [
+    "dim_fecha.ipynb",
+    "dim_hora.ipynb",
+    "dim_cliente.ipynb",
+    "dim_mensajero.ipynb",
+    "dim_novedad.ipynb",
+    "dim_ubicacion.ipynb",
+    "hecho_servicio_accumulating_snap.ipynb",
+    "hecho_novedad_servicio.ipynb",
+    "hecho_realizacion_servicio_dia.ipynb",
+    "hecho_realizacion_servicio_hora.ipynb",
+]
+
+env_name = "venv"  # Nombre del entorno virtual
+success_file = (
+    "setup_success"  # Nombre del archivo que indica que setup.py fue ejecutado
+)
+
 
 def main():
-    # Lista de notebooks a ejecutar. 
-    # Especifica la ruta de cada notebook dentro de la carpeta "notebooks"
-    notebooks = [
-        #Aqui van los notebooks a ejecutar
-        # Ejemplo "dim_fecha.ipynb",
-    ]
+    # Verifica si el argumento --ignore-setup fue pasado
+    if "--ignore-setup" not in sys.argv:
+        if not check_success_file():
+            print(
+                "\n[ERROR] Falló la verificacion, no se ha ejecutado previamente 'setup.py'."
+                + "\n   * Ejecute 'setup.py' para completar la configuración."
+                + "\n   * Si desea saltar esta verificacion, ejecute 'main.py --ignore-setup' (No recomendado)."
+            )
+            return
+
+    print("\nIniciado ejecución de notebooks...")
 
     # Crea un preprocesador para ejecutar los notebooks
-    # Establece un tiempo de espera de 600 segundos y usa el kernel de Python 3
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    
+
     # Llama a la función 'process' para ejecutar cada notebook en la lista
-    process(notebooks, ep)
+    if not process(notebooks, ep):
+        return
+
+    print("\n\n[FIN] Proceso completado, todos los notebooks ejecutados correctamente.")
+
 
 def process(notebooks, ep):
-    # Itera sobre la lista de notebooks
     for notebook in notebooks:
         notebook_path = os.path.join(NOTEBOOKS_DIR, notebook)
         try:
-            print(f"Ejecutando {notebook_path}...")
+            print(f"\nEjecutando {notebook_path}...")
 
             # Abre y lee el notebook actual
             with open(notebook_path) as f:
                 nb = nbformat.read(f, as_version=4)
 
-                # Ejecuta el notebook con el directorio de trabajo configurado como "notebooks"
-                # Esto permite que el notebook encuentre módulos y archivos en esta carpeta
-                ep.preprocess(nb, {'metadata': {'path': NOTEBOOKS_DIR}})
+                # Ejecuta el notebook en el directorio para usarlo como contexto de modulos y archivos
+                ep.preprocess(nb, {"metadata": {"path": NOTEBOOKS_DIR}})
 
-                # Sobrescribe el notebook con los resultados de la ejecución, conservando el mismo archivo
-                with open(notebook_path, "w", encoding="utf-8") as f_out:
-                    nbformat.write(nb, f_out)
+                if debug:
+                    # Sobreescribe el notebook con la salida de los resultados
+                    with open(notebook_path, "w", encoding="utf-8") as f_out:
+                        nbformat.write(nb, f_out)
 
-                print(f"{notebook_path} ejecutado y actualizado.")  # Indica que la ejecución fue exitosa
+                    print(f"{notebook_path} ejecutado y actualizado.")
+                    continue
+
+                print(f"{notebook_path} ejecutado.")
 
         except Exception as e:
-            # En caso de error, muestra el mensaje de error específico
-            print(f"Error al ejecutar {notebook_path}: {e}")
+            print(
+                f"\n[ERROR] {notebook_path}: {e}"
+                + "\n[CAUTION] Ha ocurrido un error, hay algunas cosas que podria intentar:"
+                + "\n   * Verifique la configuracion de conexion en la carpeta 'config/' de este proyecto."
+                + "\n      (!) Verifique sus credenciales de autenticacion y el servidor."
+                + "\n      (!) Use una base de datos limpia para el warehouse."
+                + "\n   * Verifique que su entorno virtual este activo."
+            )
+            return False
+
+    return True
+
+
+def check_success_file():
+    success_file_path = os.path.join(env_name, success_file)
+    if os.path.exists(success_file_path):
+        return True
+    else:
+        return False
+
 
 if __name__ == "__main__":
     main()
