@@ -45,15 +45,13 @@ def check_python_version():
         py_max[1] + 1,
     ):
         print(
-            f"\n[WARNING] Se recomienda una versión de Python entre {py_min[0]}.{py_min[1]} y {py_max[0]}.{py_max[1]}."
+            f"\n[ERROR] El proceso ha sido abortado."
+            f"\nSu versión de Python es: {python_version_str}."
+            f"\nEsta versión no cumple con los requisitos de módulos y dependencias necesarias."
+            f"\n\n   * Por favor, use una versión de Python entre {py_min[0]}.{py_min[1]} y {py_max[0]}.{py_max[1]}."
         )
-        user_input = input(f"\n¿Desea continuar usando {python_version_str}? (y/n): ")
 
-        if user_input.strip().lower() != "y":
-            print(
-                f"\n[INFO] Proceso abortado. Por favor, usa una versión de Python entre {py_min[0]}.{py_min[1]} y {py_max[0]}.{py_max[1]}."
-            )
-            sys.exit(1)
+        sys.exit(1)
 
 
 def check_requirements_file():
