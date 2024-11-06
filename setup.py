@@ -1,5 +1,4 @@
 import os
-import subprocess
 import sys
 
 env_name = "venv"
@@ -16,9 +15,10 @@ def main():
 
     print(
         "\n\nProceso completado."
-        + "\n\nADVERTENCIAS:"
-        + "\n1. Recuerde completar los datos de conexión de las bases de datos en config."
-        + "\n2. Recuerde activar el entorno virtual desde su editor de código."
+        + "\n\nSiguientes pasos:"
+        + "\n   1. Complete los datos de conexión de las bases de datos en `config/`."
+        + "\n   2. Active el entorno virtual desde su editor de código."
+        + "\n   3. Ejecute el archivo 'main.py' para iniciar el proceso ETL."
     )
 
 
@@ -30,7 +30,19 @@ def check_requirements_file():
 
 def create_virtual_env():
     print("\nCreando entorno virtual...")
-    subprocess.check_call([sys.executable, "-m", "venv", env_name])
+    os.system(f"{sys.executable} -m venv {env_name}")
+
+
+def install_dependencies():
+    python_executable = generate_python_executable()
+    print(
+        f"\nUsando: {python_executable}"
+        + f"\nInstalando dependencias de Python desde {requirements_file}...\n"
+    )
+    # Actualización de pip y setuptools
+    os.system(f"{python_executable} -m pip install --upgrade pip setuptools")
+    # Instalación de requerimientos
+    os.system(f"{python_executable} -m pip install -r {requirements_file}")
 
 
 def generate_python_executable():
@@ -41,39 +53,6 @@ def generate_python_executable():
     )
 
 
-def install_dependencies():
-    python_executable = generate_python_executable()
-    python_path = (
-        subprocess.check_output(
-            [python_executable, "-c", "import sys; print(sys.executable)"]
-        )
-        .decode()
-        .strip()
-    )
-
-    print(
-        f"\nUsando: {python_executable}"
-        + f"\nRuta completa: {python_path}"
-        + f"\nInstalando dependencias de Python desde {requirements_file}...\n"
-    )
-    subprocess.check_call(
-        [
-            python_executable,
-            "-m",
-            "pip",
-            "install",
-            "--upgrade",
-            "pip",
-            "setuptools",
-        ],
-        stderr=subprocess.STDOUT,
-    )
-    subprocess.check_call(
-        [python_executable, "-m", "pip", "install", "-r", requirements_file],
-        stderr=subprocess.STDOUT,
-    )
-
-
 def init_postgres_config():
     repo_url = "https://github.com/JuanLoaiza007/config-postgres-yaml-template.git"
     target_dir = "config"
@@ -81,13 +60,24 @@ def init_postgres_config():
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    try:
-        subprocess.check_call(["git", "clone", repo_url, target_dir])
+    if os.system(f"git clone {repo_url} {target_dir}") == 0:
+
+        # Eliminar el directorio .git para que no sea reconocido como repositorio
+        git_dir = os.path.join(target_dir, ".git")
+
+        # Elimina el rastro de git para hacer la carpeta independiente
+        if os.path.exists(git_dir):
+            if os.name == "nt":
+                os.system(f"rmdir /S /Q {git_dir}")
+            else:
+                os.system(f"rm -rf {git_dir}")
         print(
             f"\nEl archivo de configuración se ha creado en: {os.path.abspath(target_dir)}"
         )
-    except subprocess.CalledProcessError as e:
-        print(f"\nError al clonar el archivo de configuración: {e}")
+    else:
+        print(
+            f"\nError al clonar el archivo de configuración. Asegúrate de tener 'git' instalado."
+        )
 
 
 if __name__ == "__main__":
