@@ -15,10 +15,11 @@ def main():
     init_postgres_config()
 
     print(
-        "\n\nProceso completado."
-        + "\n\nADVERTENCIAS:"
-        + "\n1. Recuerde completar los datos de conexión de las bases de datos en config."
-        + "\n2. Recuerde activar el entorno virtual desde su editor de código."
+        "\n\n[FIN] Proceso completado."
+        + "\n\nSiguientes pasos:"
+        + "\n1. Complete los datos de conexión de las bases de datos en 'config/'"
+        + "\n2. Active el entorno virtual desde su editor de código."
+        + "\n3. Ejecute el archivo 'main.py' para iniciar el proceso ETL."
     )
 
 
@@ -44,16 +45,28 @@ def generate_python_executable():
 def update_pip_and_setuptools():
     python_executable = generate_python_executable()
     print(f"\nActualizando pip y setuptools en el entorno virtual...")
-    os.system(f"{python_executable} -m pip install --upgrade pip setuptools")
+    os.system(f"{python_executable} -m ensurepip --upgrade")
+    os.system(f"{python_executable} -m pip install --upgrade setuptools")
 
 
 def install_dependencies():
+
+    # Flags
+    use_cache = True
+    use_binary = True
+
+    cache = "--no-cache-dir" if not use_cache else ""
+    binary = "--only-binary :all:" if use_binary else ""
+
     python_executable = generate_python_executable()
     print(
         f"\nUsando: {python_executable}"
         + f"\nInstalando dependencias de Python desde {requirements_file}...\n"
     )
-    os.system(f"{python_executable} -m pip install -r {requirements_file}")
+
+    os.system(
+        f"{python_executable} -m pip install {cache} {binary} -r {requirements_file}"
+    )
 
 
 def init_postgres_config():
