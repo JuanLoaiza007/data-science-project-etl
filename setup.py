@@ -14,18 +14,12 @@ def main():
 
     print("\nIniciando instalación y configuración del proyecto.\nEspere por favor...")
 
-    if not check_requirements_file():
-        return
-    if not create_virtual_env():
-        return
-    if not update_pip_and_setuptools():
-        return
-    if not install_dependencies():
-        return
-    if not init_postgres_config():
-        return
-    if not create_success_file():
-        return
+    check_requirements_file()
+    create_virtual_env()
+    update_pip_and_setuptools()
+    install_dependencies()
+    init_postgres_config()
+    create_success_file()
 
     print(
         "\n\n[FIN] Proceso completado."
@@ -57,16 +51,14 @@ def check_python_version():
 def check_requirements_file():
     if not os.path.exists(requirements_file):
         print(f"\n[ERROR] El archivo {requirements_file} no existe.")
-        return False
-    return True
+        sys.exit(1)
 
 
 def create_virtual_env():
     print("\nCreando entorno virtual...")
     if os.system(f"{sys.executable} -m venv {env_name}") != 0:
         print("\n[ERROR] Falló la creación del entorno virtual.")
-        return False
-    return True
+        sys.exit(1)
 
 
 def generate_python_executable():
@@ -79,14 +71,13 @@ def generate_python_executable():
 
 def update_pip_and_setuptools():
     python_executable = generate_python_executable()
-    print(f"\nActualizando pip y setuptools en el entorno virtual...")
+    print("\nActualizando pip y setuptools en el entorno virtual...")
     if (
         os.system(f"{python_executable} -m ensurepip --upgrade") != 0
         or os.system(f"{python_executable} -m pip install --upgrade setuptools") != 0
     ):
         print("\n[ERROR] Falló la actualización de pip y setuptools.")
-        return False
-    return True
+        sys.exit(1)
 
 
 def install_dependencies():
@@ -110,8 +101,7 @@ def install_dependencies():
         != 0
     ):
         print("\n[ERROR] Falló la instalación de dependencias.")
-        return False
-    return True
+        sys.exit(1)
 
 
 def init_postgres_config():
@@ -125,7 +115,7 @@ def init_postgres_config():
         print(
             "\n[ERROR] Falló la clonación del archivo de configuración. Asegúrate de tener 'git' instalado."
         )
-        return False
+        sys.exit(1)
 
     git_dir = os.path.join(target_dir, ".git")
     if os.path.exists(git_dir):
@@ -136,7 +126,6 @@ def init_postgres_config():
     print(
         f"\nEl archivo de configuración se ha creado en: {os.path.abspath(target_dir)}"
     )
-    return True
 
 
 def create_success_file():
@@ -146,8 +135,7 @@ def create_success_file():
             pass
     except Exception as e:
         print(f"\n[ERROR] Falló la creación del archivo de confirmación: {e}")
-        return False
-    return True
+        sys.exit(1)
 
 
 if __name__ == "__main__":

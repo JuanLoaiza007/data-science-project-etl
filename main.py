@@ -26,15 +26,8 @@ success_file = (
 
 
 def main():
-    # Verifica si el argumento --ignore-setup fue pasado
-    if "--ignore-setup" not in sys.argv:
-        if not check_success_file():
-            print(
-                "\n[ERROR] Falló la verificacion, no se ha ejecutado previamente 'setup.py'."
-                + "\n   * Ejecute 'setup.py' para completar la configuración."
-                + "\n   * Si desea saltar esta verificacion, ejecute 'main.py --ignore-setup' (No recomendado)."
-            )
-            return
+
+    check_success_file()
 
     print("\nIniciado ejecución de notebooks...")
 
@@ -42,8 +35,7 @@ def main():
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
 
     # Llama a la función 'process' para ejecutar cada notebook en la lista
-    if not process(notebooks, ep):
-        return
+    process(notebooks, ep)
 
     print("\n\n[FIN] Proceso completado, todos los notebooks ejecutados correctamente.")
 
@@ -80,17 +72,17 @@ def process(notebooks, ep):
                 + "\n      (!) Use una base de datos limpia para el warehouse."
                 + "\n   * Verifique que su entorno virtual este activo."
             )
-            return False
-
-    return True
+            sys.exit(1)
 
 
 def check_success_file():
     success_file_path = os.path.join(env_name, success_file)
-    if os.path.exists(success_file_path):
-        return True
-    else:
-        return False
+    if not os.path.exists(success_file_path):
+        print(
+            "\n[ERROR] Falló la verificacion, no se ha ejecutado previamente 'setup.py'."
+            + "\n   * Ejecute 'setup.py' para completar la configuración."
+        )
+        sys.exit(1)
 
 
 if __name__ == "__main__":
