@@ -4,8 +4,14 @@ import sys
 env_name = "venv"
 requirements_file = "requirements.txt"
 
+py_min = [3, 10]
+py_max = [3, 12]
+
 
 def main():
+
+    check_python_version()
+
     print("\nIniciando instalación y configuración del proyecto.\nEspere por favor...")
 
     if not check_requirements_file():
@@ -28,6 +34,23 @@ def main():
         + "\n2. Active el entorno virtual desde su editor de código."
         + "\n3. Ejecute el archivo 'main.py' para iniciar el proceso ETL."
     )
+
+
+def check_python_version():
+    python_version = sys.version_info
+    python_version_str = f"{python_version.major}.{python_version.minor}"
+
+    # if python_version < (py_min[0], py_min[1]) or python_version > (py_max[0], py_max[1]):
+    print(
+        f"\n[WARNING] Se recomienda una versión de Python entre {py_min[0]}.{py_min[1]} y {py_max[0]}.{py_max[1]}."
+    )
+    user_input = input(f"\n¿Desea continuar con usando {python_version_str}? (y/n): ")
+
+    if user_input.strip().lower() != "y":
+        print(
+            f"\n[INFO] Proceso abortado. Por favor, usa una versión de Python entre {py_min[0]}.{py_min[1]} y {py_max[0]}.{py_max[1]}."
+        )
+        sys.exit(1)
 
 
 def check_requirements_file():
