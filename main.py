@@ -32,7 +32,7 @@ def main():
     print("\nIniciado ejecución de notebooks...")
 
     # Crea un preprocesador para ejecutar los notebooks
-    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep = ExecutePreprocessor(timeout=900, kernel_name="python3")
 
     # Llama a la función 'process' para ejecutar cada notebook en la lista
     process(notebooks, ep)
