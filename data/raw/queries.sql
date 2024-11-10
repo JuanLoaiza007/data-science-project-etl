@@ -33,7 +33,7 @@ ORDER BY
 
 SELECT 
 	hora.hour_24,
-	COUNT(*) as cantidad_servicios
+	SUM(horario.total_at_hour) as cantidad_servicios
 FROM
 	public.hecho_realizacion_servicio_hora horario
 JOIN
@@ -66,12 +66,12 @@ ORDER BY
 --5) Mensajeros más eficientes (Los que más servicios prestan)
 --RealizacionServicioDiario
 SELECT
-   	diario.key_mensajero, 
+   	accum.key_mensajero, 
     COUNT(*) AS cantidad_servicios
 FROM
-    public.hecho_realizacion_servicio_dia diario
+    public.hecho_servicio_accumulating_snapshot accum
 GROUP BY
-    diario.key_mensajero
+    accum.key_mensajero
 ORDER BY
     cantidad_Servicios DESC;
 
@@ -117,7 +117,7 @@ JOIN
     public.dim_hora dim_hora_closed ON hecho.time_closed = dim_hora_closed.key_hora
 WHERE 
     hecho.date_closed IS NOT NULL
-    AND hecho.time_closed IS NOT NULL;´    
+    AND hecho.time_closed IS NOT NULL;
 
 --8) Mostrar los tiempos de espera por cada fase del servicio: Iniciado, Con mensajero asignado,
 --recogido en origen, Entregado en Destino, Cerrado. En que fase del servicio hay más demoras?
