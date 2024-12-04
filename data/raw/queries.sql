@@ -1,32 +1,35 @@
 --1) En qué meses del año los clientes solicitan más servicios de mensajería
 --RealizacionServicioDiario
-
 SELECT 
-    fecha.month, 
-    COUNT(*) AS cantidad_servicios
-FROM
-    public.hecho_realizacion_servicio_dia diario
+    df.month_name AS mes,   
+    SUM(hrs.total_at_day) AS total_servicios
+FROM 
+    hecho_realizacion_servicio_dia hrs
 JOIN 
-    public.dim_fecha fecha ON diario.key_fecha = fecha.key_fecha
-GROUP BY
-    fecha.month
-ORDER BY
-    cantidad_servicios DESC;
+    dim_fecha df
+ON 
+    hrs.key_fecha = df.key_fecha
+GROUP BY 
+    df.month, df.month_name
+ORDER BY 
+    total_servicios DESC;
 
 --2) Cuáles son los días donde más solicitudes hay.
 --RealizacionServicioDiario
 
 SELECT 
-    fecha.day_of_week, 
-    COUNT(*) AS cantidad_servicios
+	dim_fecha.day_of_week,
+	SUM(diario.total_at_day) as total_servicios
 FROM
-    public.hecho_realizacion_servicio_dia diario
+	hecho_realizacion_servicio_dia diario
 JOIN 
-    public.dim_fecha fecha ON diario.key_fecha = fecha.key_fecha
+	dim_fecha
+ON 
+	diario.key_fecha = dim_fecha.key_fecha
 GROUP BY
-    fecha.day_of_week
-ORDER BY
-    cantidad_servicios DESC;
+	dim_fecha.day_of_week
+ORDER BY 
+	total_servicios DESC;    
 
 --3) A qué hora los mensajeros están más ocupados.
 --RealizacionServicioHora
@@ -47,53 +50,62 @@ ORDER BY
 --RealizacionServicioDiario
 
 SELECT 
-    cliente.key_cliente,
-    fecha.month,
-    COUNT(*) AS cantidad_servicios
+    dc.name AS cliente,
+    df.month_name AS mes,
+    SUM(hrs.total_at_day) AS total_servicios
 FROM 
-    public.hecho_realizacion_servicio_dia servicio
+    hecho_realizacion_servicio_dia hrs
 JOIN 
-    public.dim_cliente cliente ON servicio.key_cliente = cliente.key_cliente
+    dim_cliente dc
+ON 
+    hrs.key_cliente = dc.key_cliente
 JOIN 
-    public.dim_fecha fecha ON servicio.key_fecha = fecha.key_fecha
+    dim_fecha df
+ON 
+    hrs.key_fecha = df.key_fecha
 GROUP BY 
-    cliente.key_cliente,
-    fecha.month
+    dc.name, df.month, df.month_name
 ORDER BY 
-    cliente.key_cliente,
-    fecha.month;
+    total_Servicios desc;
 
 --5) Mensajeros más eficientes (Los que más servicios prestan)
 --RealizacionServicioDiario
 SELECT
-   	accum.key_mensajero, 
-    COUNT(*) AS cantidad_servicios
+	dm.full_name as nombre_mensajero,	
+	dm.key_mensajero as key,
+    COUNT(*) AS total_servicios
 FROM
     public.hecho_servicio_accumulating_snapshot accum
+JOIN
+	dim_mensajero dm
+ON
+	accum.key_mensajero = dm.key_mensajero
 GROUP BY
-    accum.key_mensajero
+    dm.full_name,
+	dm.key_mensajero
 ORDER BY
-    cantidad_Servicios DESC;
+    total_Servicios DESC;
 
 --6) Cuáles son las sedes que más servicios solicitan por cada cliente.
 --   RealizacionServicioDiario     
 
-SELECT 
-    cliente.key_cliente,
-    ubicacion.key_ubicacion,
-    COUNT(*) AS cantidad_servicios
+SELECT
+	dc.name as nombre_cliente,
+	dc.key_cliente as key_cliente,
+	du.city as ciudad,
+	du.department as departamento,
+    du.key_ubicacion as key_ubicacion,
+    SUM(servicio.total_at_day) AS total_servicios
 FROM 
     public.hecho_realizacion_servicio_dia servicio
 JOIN 
-    public.dim_cliente cliente ON servicio.key_cliente = cliente.key_cliente
+    public.dim_cliente dc ON servicio.key_cliente = dc.key_cliente
 JOIN 
-    public.dim_ubicacion ubicacion ON servicio.key_ubicacion = ubicacion.key_ubicacion
+    public.dim_ubicacion du ON servicio.key_ubicacion = du.key_ubicacion
 GROUP BY 
-    cliente.key_cliente,
-    ubicacion.key_ubicacion
+	dc.name, dc.key_cliente, du.city, du.department, du.key_ubicacion
 ORDER BY 
-    cliente.key_cliente,
-    ubicacion.key_ubicacion;
+	nombre cliente, total_servicios desc;
 
 --7) Cuál es el tiempo promedio de entrega desde que se solicita el servicio hasta que se cierra el caso.
 --    Servicio_Acummulating_Snapshot
@@ -153,12 +165,17 @@ ORDER BY
 --9) Cuáles son las novedades que más se presentan durante la prestación del servicio?
 --    NovedadesServicio
 
-SELECT
-	novedad.key_novedad,
-	COUNT(*) as frecuencia_novedad
-FROM
-	public.hecho_novedad_servicio novedad
-GROUP BY
-	novedad.key_novedad
+SELECT 
+    dn.type AS novedad,
+    COUNT(hns.key_hecho_novedad_servicio) AS total_ocurrencias
+FROM 
+    hecho_novedad_servicio hns
+JOIN 
+    dim_novedad dn
+ON 
+    hns.key_novedad = dn.key_novedad
+GROUP BY 
+    dn.type
 ORDER BY 
-	frecuencia_novedad DESC;
+    total_ocurrencias DESC;
+
